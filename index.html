@@ -9,12 +9,35 @@
     <form name ="my">
       <input name="todo" value = "" id="write">
       <input type="submit" value = "Add" id="enterButton">
-    </form>
-    <div class="twocolumn">
-      <ul id="todo">
-      </ul>
-      <ul id="done">
-      </ul>
+    </form> 
+    <div id = "center">
+      <div class="twocolumn">
+        <div id="rightColumn">
+          <h2>To-Do List</h2>
+          <table id="todo">
+            <tr class = "tableheader">
+              <td class = "item"><b>Item</b></td>
+              <td class = "cat"><b>Category</b></td>
+              <td class = "due"><b>Do By</b></td>
+              <td class = "settings"><img src = "images/gear.png" alt="settings" class = "settingsButton"></td>
+            </tr>
+          </table>
+        </div>
+
+
+        <div id = "leftColumn">
+          <h2>Finished List</h2>
+          <table id="done">
+            <tr class = "tableheader">
+              <td class = "item"><b>Item</b></td>
+              <td class = "cat"><b>Category</b></td>
+              <td class = "due"><b>Do By</b></td>
+            </tr>
+          </table>
+        </div>    
+
+
+      </div>
     </div>
     <script src="script.js"></script>
   </body>
