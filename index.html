@@ -11,11 +11,31 @@
     <h1>TolDor</h1>
     <button id="newTask">Add New Task</button>
 
-    <form name ="my" hidden>
-      <input name="todo" value = "" id="write">
-      <input type="submit" value = "Add" id="enterButton">
-    </form> 
-    
+    <div id = "creationMenu" hidden>
+      <h3>Task</h3>
+      <form name ="my">
+        <input name="todo" value = "" id="write">
+        <input type="submit" value = "Add" id="enterButton">
+      </form> 
+
+      <h3>Category</h3>
+      <div class = "twocolumn">
+        <div>
+          <ul id = "catList">
+            <li id = "createCat" class="catItem">+</li>
+          </ul>
+        </div>
+        <div>
+          <form name ="catCreator" hidden>
+            <input name="catNamer" value = "" id="catWrite">
+            <input type="color" id="catColor" name="catColor" value="#0D0630">
+            <input type="submit" value = "Create" id="catEnter">
+          </form> 
+          <color></color>
+        </div>
+      </div>
+    </div>
+
     <div id = "center">
       <!-- <div class="twocolumn"> -->
       <div>
