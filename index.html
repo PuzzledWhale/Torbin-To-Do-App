@@ -1,37 +1,45 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
+
   <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="style.css">
-    <title></title>
+    <title>TolDor</title>
   </head>
+
   <body>
-    <form name ="my">
+    <h1>TolDor</h1>
+    <button id="newTask">Add New Task</button>
+
+    <form name ="my" hidden>
       <input name="todo" value = "" id="write">
       <input type="submit" value = "Add" id="enterButton">
     </form> 
+    
     <div id = "center">
-      <div class="twocolumn">
-        <div id="rightColumn">
-          <h2>To-Do List</h2>
+      <!-- <div class="twocolumn"> -->
+      <div>
+        <div id="todoSection">
+          <h2>Uncompleted Tasks</h2>
           <table id="todo">
             <tr class = "tableheader">
-              <td class = "item"><b>Item</b></td>
+              <td class = "item"><b>Task</b></td>
               <td class = "cat"><b>Category</b></td>
               <td class = "due"><b>Do By</b></td>
-              <td class = "settings"><img src = "images/gear.png" alt="settings" class = "settingsButton"></td>
+              <!-- <td class = "settings"><img src = "images/geardark.png" alt="settings" class = "settingsButton" hidden></td> -->
             </tr>
           </table>
         </div>
 
 
-        <div id = "leftColumn">
-          <h2>Finished List</h2>
+        <div id = "doneSection">
+          <h2>Completed Tasks</h2>
           <table id="done">
             <tr class = "tableheader">
-              <td class = "item"><b>Item</b></td>
+              <td class = "item"><b>Task</b></td>
               <td class = "cat"><b>Category</b></td>
               <td class = "due"><b>Do By</b></td>
+              <!-- <td class = "settings"><img src = "images/geardark.png" alt="settings" class = "settingsButton" hidden></td> -->
             </tr>
           </table>
         </div>    

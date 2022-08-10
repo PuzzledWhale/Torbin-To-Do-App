@@ -9,8 +9,10 @@ body {
 }
 
 table {
+  margin-top: 10px;
   border-collapse: collapse;
   text-align: center;
+  empty-cells: show;
 }
 
 .todoentry {
@@ -23,12 +25,12 @@ table {
   text-decoration-line: line-through;
 }
 
-#leftColumn {
-  margin-left: 20px;
-}
-
 .tableheader {
   background-color: #384E77;
+}
+
+tr {
+  height: 20px;
 }
 
 .entryName {
@@ -37,7 +39,23 @@ table {
 
 .todoentry:hover {
   background-color: #E6F9A4;
-  color: #000;
+  text-decoration-line: line-through;
+}
+
+.doneentry:hover {
+  text-decoration-line: none;
+  background-color: #E6F9A4;
+}
+
+.settingsButton {
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+h2 {
+  margin-top: 50px;
 }
 
 #center {
@@ -58,13 +76,18 @@ table {
 .due {
   width: 100px;
 }
-#enterButton {
+#enterButton, #newTask {
   border: none;
   background-color: #0D0630;
   color: #FFF;
   width: 100px;
   height: 30px;
 }
+
+#newTask {
+  margin-top: 10px;
+}
+
 #write {
   width: 500px;
   height: 25px;
@@ -74,7 +97,11 @@ table {
   background-color: #18314F;
 }
 
-.settingsButton {
-  width: 12px;
-  height: 12px;
+.subnavMenu {
+  background-color: #384E77;
+  color:#FFF;
+}
+
+form {
+  margin-top: 10px;
 }
