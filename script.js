@@ -105,7 +105,7 @@ function addNewItem(entry, table) {
   let elemName = elem.firstChild;
   elemName.classList.add("entryName");
   let catBlock = elem.childNodes[1];
-  if(findCategory(catBlock)) catBlock.style.backgroundColor = jsCatList[findCategory(catBlock)].color;
+  if(catBlock.innerHTML != "none") catBlock.style.backgroundColor = jsCatList[findCategory(catBlock)].color;
   elem.addEventListener("click", markDone);
   elem.classList.add(entry.completed? "doneentry":"todoentry");
   table.appendChild(elem);
@@ -259,4 +259,8 @@ function getDate(event) {
   event.preventDefault();
   let tempDate = new Date(dateForm.elements.dateInput.value);
   dateWait = tempDate;
+}
+
+function isDark(color) {
+  
 }
