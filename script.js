@@ -8,6 +8,9 @@ const catForm = document.querySelector("[name='catCreator']");
 const createCatButton = document.querySelector("[id='createCat']");
 const catList = document.querySelector("[id='catList']");
 
+const dateForm = document.querySelector("[name='date'");
+const dateCreate = document.querySelector("[id='dateInput'");
+
 const tableHeaders = document.querySelectorAll("[class = 'tableheader");
 
 const list = document.querySelector("[id='todo'");
@@ -21,8 +24,10 @@ myButton.addEventListener("click", showTaskCreation);
 form.addEventListener("submit", userAdd);
 catList.addEventListener("click", selectCategory);
 catForm.addEventListener("submit", newCategory);
+dateForm.addEventListener("submit", getDate);
 
 let catWait;
+let dateWait;
 
 class category {
   constructor(name, color = "#0D0630") {
@@ -32,10 +37,12 @@ class category {
 }
 
 class entry {
-  constructor(name, completed, category) {
+  constructor(name, completed, category, date) {
     this.name = name;
     this.completed = completed;
     this.category = category;
+    this.date = date;
+    this.dateString = this.date.getMonth() + 1 +"/" + this.date.getDate() + "/" + this.date.getFullYear();
   }
 }
 
@@ -78,7 +85,8 @@ for (i = 0; i < tableHeaders.length; i++) {
 function userAdd(event) {
   event.preventDefault();
   catWait = catWait ?? new category("none");
-  newEntry = new entry(form.elements.todo.value, false, catWait);
+  dateWait = dateWait ?? new Date();
+  newEntry = new entry(form.elements.todo.value, false, catWait, dateWait);
   catWait = null;
   form.elements.todo.value = "";
   itemList.push(newEntry);
@@ -91,18 +99,19 @@ function userAdd(event) {
 //Adds a new list item to a given list when given an item to add
 function addNewItem(entry, table) {
   const elem = document.createElement('tr');
-  elem.innerHTML = "<td>" + entry.name + "</td><td>" + entry.category.name + "</td><td>soon</td><td class=\"settings\"><img src = \"images/geardark.png\" alt=\"settings\" class = \"settingsButton\" hidden></td>";
+  elem.innerHTML = "<td>" + entry.name + "</td><td>" + entry.category.name + "</td><td>" + entry.dateString + "</td><td class=\"settings\"><img src = \"images/geardark.png\" alt=\"settings\" class = \"settingsButton\" hidden></td>";
   elem.addEventListener("mouseover", toggleSettings)
   elem.addEventListener("mouseout", toggleSettings)
   let elemName = elem.firstChild;
   elemName.classList.add("entryName");
   let catBlock = elem.childNodes[1];
-  catBlock.style.backgroundColor = jsCatList[findCategory(catBlock)].color;
+  if(findCategory(catBlock)) catBlock.style.backgroundColor = jsCatList[findCategory(catBlock)].color;
   elem.addEventListener("click", markDone);
   elem.classList.add(entry.completed? "doneentry":"todoentry");
   table.appendChild(elem);
 }
 
+//If a user clicks on an entry then move the item to the opposite list
 function markDone(event) {
   event.preventDefault();
   //if the settings button was clicked on alter functionality
@@ -244,4 +253,10 @@ function deleteEntry(elem) {
   let idx = findEntry(doneList, elem);
   doneList.splice(idx, 1);
   resetStorage('doneData', doneList);
+}
+
+function getDate(event) {
+  event.preventDefault();
+  let tempDate = new Date(dateForm.elements.dateInput.value);
+  dateWait = tempDate;
 }

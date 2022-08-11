@@ -80,13 +80,17 @@ h3 {
 .due {
   width: 100px;
 }
-#enterButton, #newTask, #catEnter{
+input[type="submit"], button {
   border: none;
   background-color: #0D0630;
   text-align: center;
   color: #FFF;
   width: 100px;
   height: 30px;
+}
+
+input[type="submit"]:hover, button:hover {
+  background-color: #384E77;
 }
 
 #newTask {
