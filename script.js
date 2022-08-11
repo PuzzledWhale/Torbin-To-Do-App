@@ -1,4 +1,5 @@
 const myButton = document.querySelector("[id='newTask']");
+const delButton = document.querySelector("[id='clearStorage']");
 
 const createMenu = document.querySelector("[id='creationMenu']");
 
@@ -21,6 +22,7 @@ const doneList =[];
 const jsCatList = [];
 
 myButton.addEventListener("click", showTaskCreation);
+delButton.addEventListener("click", fullClear)
 form.addEventListener("submit", userAdd);
 catList.addEventListener("click", selectCategory);
 catForm.addEventListener("submit", newCategory);
@@ -42,7 +44,8 @@ class entry {
     this.completed = completed;
     this.category = category;
     this.date = date;
-    this.dateString = this.date.getMonth() + 1 +"/" + this.date.getDate() + "/" + this.date.getFullYear();
+    this.dateString = date.toLocaleDateString();//this.date.getMonth() + 1 +"/" + this.date.getDate() + "/" + this.date.getFullYear();
+    this.timeString = date.toLocaleTimeString();//createTimeString(this.date);
   }
 }
 
@@ -99,7 +102,7 @@ function userAdd(event) {
 //Adds a new list item to a given list when given an item to add
 function addNewItem(entry, table) {
   const elem = document.createElement('tr');
-  elem.innerHTML = "<td>" + entry.name + "</td><td>" + entry.category.name + "</td><td>" + entry.dateString + "</td><td class=\"settings\"><img src = \"images/geardark.png\" alt=\"settings\" class = \"settingsButton\" hidden></td>";
+  elem.innerHTML = "<td>" + entry.name + "</td><td>" + entry.category.name + "</td><td>" + entry.dateString + "</td><td>" + entry.timeString + "</td><td class=\"settings\"><img src = \"images/geardark.png\" alt=\"settings\" class = \"settingsButton\" hidden></td>";
   elem.addEventListener("mouseover", toggleSettings)
   elem.addEventListener("mouseout", toggleSettings)
   let elemName = elem.firstChild;
@@ -194,8 +197,7 @@ function showSettingsMenu(event) {
 function showTaskCreation(event) {
   event.preventDefault();
   resetCatList();
-  myButton.hidden = true;
-  createMenu.hidden = false;
+  createMenu.hidden = !createMenu.hidden;
 }
 
 function newCategory(event) {
@@ -261,6 +263,18 @@ function getDate(event) {
   dateWait = tempDate;
 }
 
-function isDark(color) {
-  
+function fullClear(event) {
+  event.preventDefault();
+  localStorage.clear();
+  if(!confirm("Pressing this will completely reset all tasks and categories permanently. Are you sure you want this?")) {
+    return;
+  }
+  clearList(list);
+  clearList(finList);
+}
+
+function clearList(tempList) {
+  for(let i = 2; i < tempList.childNodes.length; i++) {
+    tempList.childNodes[i].style.display = "none";
+  }
 }

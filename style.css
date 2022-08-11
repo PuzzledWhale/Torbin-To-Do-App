@@ -74,12 +74,10 @@ h3 {
 .item {
   width: 500px;
 }
-.cat {
+.cat, .due, .time {
   width: 100px;
 }
-.due {
-  width: 100px;
-}
+
 input[type="submit"], button {
   border: none;
   background-color: #0D0630;
