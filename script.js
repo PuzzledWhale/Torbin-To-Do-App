@@ -26,7 +26,7 @@ delButton.addEventListener("click", fullClear)
 form.addEventListener("submit", userAdd);
 catList.addEventListener("click", selectCategory);
 catForm.addEventListener("submit", newCategory);
-dateForm.addEventListener("submit", getDate);
+dateForm.addEventListener("change", getDate);
 
 let catWait;
 let dateWait;
@@ -35,6 +35,7 @@ class category {
   constructor(name, color = "#0D0630") {
     this.name = name;
     this.color = color;
+    this.textColor = "#000";
   }
 }
 
@@ -92,6 +93,7 @@ function userAdd(event) {
   newEntry = new entry(form.elements.todo.value, false, catWait, dateWait);
   catWait = null;
   form.elements.todo.value = "";
+  dateForm.elements.dateInput.value = null;
   itemList.push(newEntry);
   addNewItem(newEntry, list);
   localStorage.setItem('todoData', JSON.stringify(itemList));
@@ -102,13 +104,20 @@ function userAdd(event) {
 //Adds a new list item to a given list when given an item to add
 function addNewItem(entry, table) {
   const elem = document.createElement('tr');
-  elem.innerHTML = "<td>" + entry.name + "</td><td>" + entry.category.name + "</td><td>" + entry.dateString + "</td><td>" + entry.timeString + "</td><td class=\"settings\"><img src = \"images/geardark.png\" alt=\"settings\" class = \"settingsButton\" hidden></td>";
-  elem.addEventListener("mouseover", toggleSettings)
-  elem.addEventListener("mouseout", toggleSettings)
+  elem.innerHTML = "<td>" + entry.name + "</td><td>" + entry.category.name + "</td><td>" + entry.dateString + "</td><td>" + entry.timeString + "</td>";
+  if(entry.completed) {
+    elem.innerHTML += "<td class=\"delete\"><img src = \"images/x.png\" alt=\"Delete\" class = \"deleteButton\" hidden></td>";
+    elem.addEventListener("mouseover", toggleDelete)
+    elem.addEventListener("mouseout", toggleDelete)
+  }
   let elemName = elem.firstChild;
   elemName.classList.add("entryName");
   let catBlock = elem.childNodes[1];
-  if(catBlock.innerHTML != "none") catBlock.style.backgroundColor = jsCatList[findCategory(catBlock)].color;
+  let currentCat = jsCatList[findCategory(catBlock)];
+  if(catBlock.innerHTML != "none") {
+    catBlock.style.backgroundColor = currentCat.color;
+    catBlock.style.color = currentCat.textColor;
+  }
   elem.addEventListener("click", markDone);
   elem.classList.add(entry.completed? "doneentry":"todoentry");
   table.appendChild(elem);
@@ -117,8 +126,8 @@ function addNewItem(entry, table) {
 //If a user clicks on an entry then move the item to the opposite list
 function markDone(event) {
   event.preventDefault();
-  //if the settings button was clicked on alter functionality
-  if(event.target.classList[0] === 'settingsButton') {
+  //if the delete button was clicked on alter functionality
+  if(event.target.classList[0] === 'deleteButton') {
     if(this.classList[0] === "doneentry") {
       deleteEntry(this);
     }
@@ -177,15 +186,9 @@ function resetStorage (type, list) {
   return;
 }
 
-function toggleSettings(event) {
+function toggleDelete(event) {
   event.preventDefault();
-  let icon = this.querySelector("[class=settingsButton]");
-  icon.hidden = !icon.hidden;
-}
-
-function hideSettings(event) {
-  event.preventDefault();
-  let icon = this.querySelector("[class=settingsButton]");
+  let icon = this.querySelector("[class=deleteButton]");
   icon.hidden = !icon.hidden;
 }
 
@@ -205,6 +208,9 @@ function newCategory(event) {
   let tempCat = new category(catForm.elements.catNamer.value, catForm.elements.catColor.value)
   catForm.elements.catNamer.value = "";
   catForm.elements.catColor.value = "#0D0630"
+  if(isDark(tempCat.color)) {
+    tempCat.textColor = "#FFF";
+  }
   printNewCat(tempCat);
   jsCatList.push(tempCat);
   localStorage.setItem('category', JSON.stringify(jsCatList));
@@ -216,9 +222,11 @@ function printNewCat(cat) {
   elem.innerHTML = cat.name;
   elem.classList.add("catItem")
   elem.style.backgroundColor = cat.color;
+  elem.style.color = cat.textColor;
   catList.prepend(elem);
 }
 
+//If a user clicks on a category, then highlight their selection and set it internally
 function selectCategory(event) {
   event.preventDefault();
   if(event.target.id == "createCat") {
@@ -231,8 +239,8 @@ function selectCategory(event) {
   resetCatList();
   catWait = jsCatList[findCategory(event.target)];
   event.target.style.borderStyle = 'solid';
-  event.target.style.borderWidth = '2px';
-  event.target.style.borderColor = "white"//catWait.color;
+  event.target.style.borderWidth = '3px';
+  event.target.style.borderColor = "white";
   return;
 }
 
@@ -277,4 +285,20 @@ function clearList(tempList) {
   for(let i = 2; i < tempList.childNodes.length; i++) {
     tempList.childNodes[i].style.display = "none";
   }
+}
+
+//Detect if a given color is too dark. If so, return true
+function isDark(color) {
+  let col = color.substring(1);      // strip #
+  let rgb = parseInt(col, 16);   // convert rrggbb to decimal
+  let red = (rgb >> 16) & 0xff;  // extract red
+  let green = (rgb >>  8) & 0xff;  // extract green
+  let blue = (rgb >>  0) & 0xff;  // extract blue
+
+  var luma = 0.2126 * red + 0.7152 * green + 0.0722 * blue; // per ITU-R BT.709
+
+  if (luma < 70) {
+    return true;
+  }
+  return false;
 }

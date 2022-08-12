@@ -47,7 +47,7 @@ tr {
   /* background-color: #E6F9A4; */
 }
 
-.settingsButton {
+.deleteButton {
   width: 16px;
   height: 16px;
   margin-left: 2px;
@@ -100,7 +100,7 @@ input[type="submit"]:hover, button:hover {
   height: 25px;
 }
 
-.settings {
+.delete {
   background-color: #18314F;
 }
 
