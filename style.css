@@ -33,6 +33,10 @@ tr {
   height: 20px;
 }
 
+li {
+  list-style: none;
+}
+
 .entryName {
   text-align: left;
 }
@@ -47,35 +51,30 @@ tr {
   /* background-color: #E6F9A4; */
 }
 
-.deleteButton {
-  width: 16px;
-  height: 16px;
-  margin-left: 2px;
-  margin-right: 2px;
-}
-
 h2 {
   margin-top: 50px;
 }
 
 h3 {
-  margin-top: 10px;
+  margin-top: 15px;
 }
 
-#center {
+.center {
   margin: auto;
   width: 100%;
-  padding: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .twocolumn {
   flex-direction: row;
   display: flex;
 }
 .item {
-  width: 500px;
+  width: 800px;
 }
 .cat, .due, .time {
-  width: 100px;
+  width: 160px;
 }
 
 input[type="submit"], button {
@@ -100,16 +99,13 @@ input[type="submit"]:hover, button:hover {
   height: 25px;
 }
 
-.delete {
-  background-color: #18314F;
-}
 
 .subnavMenu {
   background-color: #384E77;
   color:#FFF;
 }
 
-li {
+#catList li {
   display:inline-block;
   margin-right: 10px;
   background-color: #0D0630;
@@ -118,10 +114,71 @@ li {
   padding: 10px 20px;
 }
 
-li:hover {
+#catList li:hover {
   background-color: #384E77;
 }
 
 #catWrite {
   width: 300px;
+}
+
+#creationMenu {
+  display:none;
+  position: absolute;
+  top: 30%;
+  margin: auto;
+  z-index: 2;
+  background-color: #8BBEB2;
+  padding: 20px;
+}
+
+#cancelCreator {
+  position: absolute;
+  right: 20px;
+  cursor: pointer;
+}
+
+
+
+
+
+/* Settings Styling Below */
+.settings {
+  background-color: #18314F;
+  /* display: none; */
+}
+
+.settingsButton {
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+  margin-right: 2px;
+  cursor: pointer;
+  display:none;
+}
+
+.settingsMenu {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 80px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  cursor: pointer;
+}
+
+.settingsMenu li:hover {
+  background-color: #dbdbdb;
+}
+
+tr:hover .settingsButton {
+  display: block;
+}
+
+.settings:hover .settingsMenu {
+  display: block;
+}
+
+.settingsButton:hover {
+  filter:brightness(0.8);
 }

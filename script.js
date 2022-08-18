@@ -2,6 +2,7 @@ const myButton = document.querySelector("[id='newTask']");
 const delButton = document.querySelector("[id='clearStorage']");
 
 const createMenu = document.querySelector("[id='creationMenu']");
+const xbutton = document.querySelector("[id='cancelCreator']");
 
 const form = document.querySelector("[name='my']");
 
@@ -21,33 +22,37 @@ const itemList = [];
 const doneList =[];
 const jsCatList = [];
 
-myButton.addEventListener("click", showTaskCreation);
+let editing = false;
+let editElem, editedItem;
+
+//creation of settings menu UI
+settingsElements = "<td class=\"settings\"><img src = \"images/geardark.png\" alt=\"Settings\" class = \"settingsButton\" ><div class = \"settingsMenu\"><ul><li id = \"edit\">Edit</li><li id = \"delete\">Delete</li></ul></div></td>";
+
+myButton.addEventListener("click", toggleCreator);
 delButton.addEventListener("click", fullClear)
-form.addEventListener("submit", userAdd);
+form.addEventListener("submit", userSave);
 catList.addEventListener("click", selectCategory);
 catForm.addEventListener("submit", newCategory);
 dateForm.addEventListener("change", getDate);
+xbutton.addEventListener("click", hideMenu);
 
 let catWait;
 let dateWait;
 
-class category {
-  constructor(name, color = "#0D0630") {
-    this.name = name;
-    this.color = color;
-    this.textColor = "#000";
-  }
+function category(name, color = "#0D0630") {
+  this.name = name;
+  this.color = color;
+  this.textColor = "#000";
 }
 
-class entry {
-  constructor(name, completed, category, date) {
-    this.name = name;
-    this.completed = completed;
-    this.category = category;
-    this.date = date;
-    this.dateString = date.toLocaleDateString();//this.date.getMonth() + 1 +"/" + this.date.getDate() + "/" + this.date.getFullYear();
-    this.timeString = date.toLocaleTimeString();//createTimeString(this.date);
-  }
+function entry(name, completed, category, date) {
+  this.name = name;
+  this.completed = completed;
+  this.category = category;
+  this.date = date;
+  this.dateString = date.toLocaleDateString();//this.date.getMonth() + 1 +"/" + this.date.getDate() + "/" + this.date.getFullYear();
+  this.timeString = date.toLocaleTimeString().slice(0,4) + date.toLocaleTimeString().slice(7);//createTimeString(this.date);
+
 }
 
 // localStorage.clear(); //Reset "button" for local storage. WARNING: DO NOT UNCOMMENT UNLESS NECESSARY
@@ -86,18 +91,49 @@ for (i = 0; i < tableHeaders.length; i++) {
 */
 
 //if a user ipnuts a new todo item then create one and add it to the list
-function userAdd(event) {
+function userSave(event) {
   event.preventDefault();
+  createMenu.style.display = "none";
+  toggleBlur();
   catWait = catWait ?? new category("none");
   dateWait = dateWait ?? new Date();
-  newEntry = new entry(form.elements.todo.value, false, catWait, dateWait);
-  catWait = null;
+  if(!editing) {
+    newEntry = new entry(form.elements.todo.value, false, catWait, dateWait);
+    catWait = null;
+    addNewItem(newEntry, list);
+    itemList.push(newEntry);
+    localStorage.setItem('todoData', JSON.stringify(itemList));
+  }
+  else {
+    editedItem = editedItem ?? new entry();
+
+    //update the parameters of the item to be edited (very inefficient and dumb but object methods are wacky)
+    editedItem.name = form.elements.todo.value;
+    editedItem.category = catWait;
+    editedItem.date = dateWait;
+    editedItem.dateString = editedItem.date.toLocaleDateString();
+    editedItem.timeString = editedItem.date.toLocaleTimeString().slice(0,4) + editedItem.date.toLocaleTimeString().slice(7);
+
+    //Update the element itself based on the changes made
+    editElem = editElem ?? document.createElement('tr');
+    editElem.innerHTML = "<td>" + editedItem.name + "</td><td>" + editedItem.category.name + "</td><td>" + editedItem.dateString + "</td><td>" + editedItem.timeString + "</td>";
+    editElem.innerHTML += settingsElements;
+
+    let elemName = editElem.firstChild;
+    elemName.classList.add("entryName");
+    let catBlock = editElem.childNodes[1];
+    let currentCat = jsCatList[findCategory(catBlock)];
+    if(catBlock.innerHTML != "none") {
+      catBlock.style.backgroundColor = currentCat.color;
+      catBlock.style.color = currentCat.textColor;
+    }
+    editing = false;
+    (editedItem.completed? doneList:itemList)[findEntry(editedItem.completed? doneList:itemList, editElem)] = editedItem;
+    resetStorage(editedItem.completed? 'doneData':'todoData', (editedItem.completed? doneList:itemList));
+  }
   form.elements.todo.value = "";
   dateForm.elements.dateInput.value = null;
-  itemList.push(newEntry);
-  addNewItem(newEntry, list);
-  localStorage.setItem('todoData', JSON.stringify(itemList));
-  createMenu.hidden = true;
+  // createMenu.hidden = true;
   myButton.hidden = false;
 }
 
@@ -105,11 +141,9 @@ function userAdd(event) {
 function addNewItem(entry, table) {
   const elem = document.createElement('tr');
   elem.innerHTML = "<td>" + entry.name + "</td><td>" + entry.category.name + "</td><td>" + entry.dateString + "</td><td>" + entry.timeString + "</td>";
-  if(entry.completed) {
-    elem.innerHTML += "<td class=\"delete\"><img src = \"images/x.png\" alt=\"Delete\" class = \"deleteButton\" hidden></td>";
-    elem.addEventListener("mouseover", toggleDelete)
-    elem.addEventListener("mouseout", toggleDelete)
-  }
+  elem.innerHTML += settingsElements;
+  // elem.addEventListener("mouseover", toggleSettings)
+  // elem.addEventListener("mouseout", toggleSettings)
   let elemName = elem.firstChild;
   elemName.classList.add("entryName");
   let catBlock = elem.childNodes[1];
@@ -118,23 +152,27 @@ function addNewItem(entry, table) {
     catBlock.style.backgroundColor = currentCat.color;
     catBlock.style.color = currentCat.textColor;
   }
-  elem.addEventListener("click", markDone);
+  elem.addEventListener("click", tableClick);
   elem.classList.add(entry.completed? "doneentry":"todoentry");
   table.appendChild(elem);
 }
 
-//If a user clicks on an entry then move the item to the opposite list
-function markDone(event) {
+//If a user clicks on an entry then detect what part of the entry was clicked and respond accordingly
+function tableClick(event) {
   event.preventDefault();
   //if the delete button was clicked on alter functionality
-  if(event.target.classList[0] === 'deleteButton') {
-    if(this.classList[0] === "doneentry") {
-      deleteEntry(this);
-    }
+  if(event.target.id === 'edit') {
+    // alert("edit");
+    editEntry(((this.classList[0] === "todoentry")? itemList : doneList), this);
+    return;
+  } 
+  if(event.target.id === 'delete') {
+    deleteEntry(this, (this.classList[0] === "todoentry")? itemList : doneList);
     return;
   }
-  this.style.display = 'none';
 
+  this.style.display = 'none';
+  
   let idx;
   let temp;
 
@@ -147,6 +185,7 @@ function markDone(event) {
     temp = doneList[idx];
   }
 
+  this.remove();
   (temp.completed? doneList:itemList).splice(idx, 1);
   resetStorage(temp.completed? 'doneData':'todoData', (temp.completed? doneList:itemList));
   temp.completed = !temp.completed;
@@ -156,7 +195,7 @@ function markDone(event) {
   // localStorage.removeItetam('doneData'); //uncomment this to enable manual clearing of completed tasks in local storage
 }
 
-//searches a list and return the index of a given element. Returns undefined if the element is not found
+//searches a js list and return the index of a given element. Returns undefined if the element is not found
 function findEntry (list, elem) {
   let tempList = list ?? [];
   let itemName = elem.firstChild.innerHTML;
@@ -168,6 +207,7 @@ function findEntry (list, elem) {
   return undefined;
 }
 
+//searches the js categories list for a given category button element
 function findCategory (elem) {
   let tempList = jsCatList ?? [];
   let itemName = elem.innerHTML;
@@ -186,23 +226,38 @@ function resetStorage (type, list) {
   return;
 }
 
-function toggleDelete(event) {
+function toggleSettings(event) {
   event.preventDefault();
-  let icon = this.querySelector("[class=deleteButton]");
+  let icon = this.querySelector("[class=settingsButton]");
   icon.hidden = !icon.hidden;
+  // settingsMenu.hidden = true;//icon.hidden? true:false;
 }
 
-function showSettingsMenu(event) {
-  event.preventDefault();
-  //WIP to be implemented
-}
-
-function showTaskCreation(event) {
+function toggleCreator(event) {
   event.preventDefault();
   resetCatList();
-  createMenu.hidden = !createMenu.hidden;
+  createMenu.style.display = createMenu.style.display === "block"? "none":"block";
+  // document.body.addEventListener("click", hideMenu);
+  toggleBlur();
 }
 
+//blurs all elements thar are not the creation menu
+function toggleBlur() {
+  let inCreateMenu = false;
+  for(const elem of document.body.getElementsByTagName('*')) {
+    if(elem.classList[0] === "center") {
+      inCreateMenu = true;
+    }
+    else if(elem.classList[0] === "listSection") {
+      inCreateMenu = false;
+    }
+    if(!inCreateMenu) {
+      elem.style.filter = elem.style.filter === "blur(6px)"? "none":"blur(6px)";
+    }
+  }
+}
+
+//Create a new category based off of user inputs
 function newCategory(event) {
   event.preventDefault();
   let tempCat = new category(catForm.elements.catNamer.value, catForm.elements.catColor.value)
@@ -217,6 +272,7 @@ function newCategory(event) {
   catForm.hidden = true;
 }
 
+//Prints a category
 function printNewCat(cat) {
   let elem = document.createElement('li');
   elem.innerHTML = cat.name;
@@ -258,11 +314,11 @@ function recolorCatList() {
   }
 }
 
-function deleteEntry(elem) {
-  elem.style.display = "none";
-  let idx = findEntry(doneList, elem);
-  doneList.splice(idx, 1);
-  resetStorage('doneData', doneList);
+function deleteEntry(elem, someList) {
+  elem.remove();
+  let idx = findEntry(someList, elem);
+  someList.splice(idx, 1);
+  resetStorage((elem.classList[0] === "todoentry")? 'todoData':'doneData', someList);
 }
 
 function getDate(event) {
@@ -301,4 +357,50 @@ function isDark(color) {
     return true;
   }
   return false;
+}
+
+function editEntry(givenList, elem) {
+  let tempEntry = givenList[findEntry(givenList, elem)];
+  //display the creation menu for users to edit with
+  toggleBlur();
+  createMenu.style.display = createMenu.style.display === "block"? "none":"block";
+  resetCatList()
+  highlightCategory(tempEntry.category);
+  form.elements.todo.value = tempEntry.name;
+  dateWait = tempEntry.date;
+  // dateForm.elements.dateInput.value = tempEntry.date.toISOString().slice(0,16);
+  editing = true;
+  editElem = elem; 
+  editedItem = tempEntry;
+  return;
+}
+
+function setDateForm(givenDate) {
+  givenDate.setMinutes(givenDate.getMinutes() - givenDate.getTimezoneOffset());
+  dateForm.value = given.toISOString().slice(0,16);
+}
+
+function hideMenu(event) {
+  event.preventDefault();
+  // document.body.removeEventListener("click", hideMenu);
+  createMenu.style.display = "none";
+  toggleBlur();
+  return;
+}
+
+
+//searches the category element list and highlights the given category
+function highlightCategory(givenCat) {
+  for(const elem of catList.children) {
+    if(elem.id === "createCat") {
+      continue;
+    }
+    if(elem.innerText === givenCat.name) {
+      resetCatList();
+      catWait = givenCat;
+      elem.style.borderStyle = 'solid';
+      elem.style.borderWidth = '3px';
+      elem.style.borderColor = "white";
+    }
+  }
 }
